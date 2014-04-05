@@ -1,0 +1,4 @@
+name=Conference Podcast
+description=Generates a feed for a General Conference Podcast
+core=7.x
+dependencies[]=querypath

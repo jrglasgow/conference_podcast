@@ -1,0 +1,66 @@
+<?php
+
+/**
+ * @file
+ *
+ * Generates a feed for a General Conference Podcast
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function conference_podcast_menu() {
+  $items = array();
+
+  $items['podcast/conference.php'] = array(
+    'title'             => 'Conference Podcast',
+    'page callback'     => 'conference_podcast_podcast_feed',
+    'access arguments'  => TRUE,
+    'file'              => 'conference_podcast.pages.inc'
+  );
+  $items['podcasts/conference.php']  = $items['podcast/conference.php'];
+
+  $items['admin/config/media/podcasts'] = array(
+    'title'             => 'Podcasts',
+    'description'       => 'Podcasts hosted by the system.',
+    'page callback'     => 'system_admin_menu_block_page',
+    'access arguments'  => array('administer system configuration'),
+    'file path'         => drupal_get_path('module', 'system'),
+    'file'              => 'system.admin.inc',
+  );
+
+  $items['admin/config/media/podcasts/conference'] = array(
+    'title'             => 'Conference',
+    'page callback'     => 'drupal_get_form',
+    'page arguments'    => array('conference_podcast_admin'),
+    'access arguments'  => array('administer system configuration'),
+    'file'              => 'conference_podcast.pages.inc'
+  );
+
+  return $items;
+}
+
+/**
+ * Get remote file headers for the given url
+ */
+function cp_remote_file_headers($url) {
+  ob_start();
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_NOBODY, TRUE);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, FALSE);
+  curl_setopt($ch, CURLOPT_HEADER, TRUE);
+  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE); //not necessary unless the file redirects
+  $data = curl_exec($ch);
+  curl_close($ch);
+  $head = ob_get_contents();
+  ob_end_clean();
+  $head = explode("\n" , trim($head));
+  $headers = array();
+  foreach( $head AS $header) {
+    $header = explode(':', trim($header));
+    if (isset($header[0]) && isset($header[1])) {
+      $headers[trim($header[0])] = trim($header[1]);
+    }
+  }
+  return $headers;
+}

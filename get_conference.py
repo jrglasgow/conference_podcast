@@ -6,7 +6,7 @@ import MySQLdb, string
 db=MySQLdb.connect(passwd="glas982156",db="podcasts", user="root")
 c=db.cursor()
 
-url_base = 'http://www.lds.org/general-conference/sessions/2013/10?lang=eng'
+url_base = 'https://www.lds.org/general-conference/sessions/2014/04?lang=eng'
 mp3_addresses = []
 
 def sanitize(text):

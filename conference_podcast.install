@@ -1,0 +1,64 @@
+<?php
+
+/**
+ * @file
+ *
+ * Install functions
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function conference_podcast_schema() {
+  $schema['conference_podcast'] = array(
+    'description' => 'Conference Podcast information',
+    'fields' => array(
+      'talk_id' => array(
+        'description' => 'The ID of the talk',
+        'type' => 'varchar',
+        'length' => '20',
+        'not null' => TRUE,
+      ),
+      'conference' => array(
+        'description' => 'the conference description',
+        'type' => 'varchar',
+        'length' => '200',
+        'not null' => FALSE,
+      ),
+      'title' => array(
+        'description' => 'the talk title',
+        'type' => 'varchar',
+        'length' => '300',
+        'not null' => FALSE,
+      ),
+      'speaker' => array(
+        'description' => 'the speaker of the talk',
+        'type' => 'varchar',
+        'length' => '200',
+        'not null' => FALSE,
+      ),
+      'url' => array(
+        'description' => 'the url of the audio file',
+        'type' => 'varchar',
+        'length' => '400',
+        'not null' => FALSE,
+      ),
+      'last_played' => array(
+        'description' => 'the last time the talk was in the feed',
+        'type' => 'int',
+        'not null' => FALSE,
+      ),
+      'size' => array(
+        'description' => 'size of the file',
+        'type' => 'int',
+        'size' => 'big',
+        'not null' => FALSE,
+      ),
+    ),
+    'unique keys' => array(
+      'talk_id' => array('talk_id')
+    ),
+  );
+
+  return $schema;
+}
