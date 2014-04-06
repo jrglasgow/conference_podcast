@@ -31,22 +31,35 @@ function conference_podcast_admin() {
   return $form;
 }
 
+/**
+ * submit handler
+ */
 function conference_podcast_admin_submit($form, &$form_state) {
+  dpm($form_state['values'], 'values');
+  if ($form_state['values']['delete']) {
+    // truncate the table
+    db_truncate('conference_podcast')->execute();
+  }
   $return = drupal_http_request($form_state['values']['import_url']);
   $html = $return->data;
   htmlqp($html, 'table.sessions tr')->each('conference_podcast_process_item');
 }
+
 function conference_podcast_process_item($count, $DOMObject) {
   // check to see if this has a speaker
   if (qp($DOMObject, 'span.speaker')->length) {
-    //dpm(qp($DOMObject)->html(),'$DOMObject');
     $fields = array();
     $fields['title'] = qp($DOMObject, 'span.talk')->text();
 
     $fields['speaker'] = trim(str_replace('By ', '', qp($DOMObject, 'span.speaker')->text()));
     $fields['url'] = qp($DOMObject, 'a.audio-mp3')->attr('href');
     $talk_id = explode('/',$fields['url']);
-    $fields['conference'] = ucwords(str_replace('-', ' ', $talk_id[5]));
+    if (isset($talk_id[5])) {
+      $fields['conference'] = ucwords(str_replace('-', ' ', $talk_id[5]));
+    }
+    else {
+      $fields['conference'] = t('Not Available');
+    }
     $talk_id = explode('-',array_pop($talk_id));
     if (empty($talk_id[0])) {
       return;
@@ -57,8 +70,6 @@ function conference_podcast_process_item($count, $DOMObject) {
     if (isset($headers['Content-Length'])) {
       $fields['size'] = $headers['Content-Length'];
     }
-    //dpm($headers, '$headers');
-    //dpm($fields, '$fields');
 
     $query = db_merge('conference_podcast')
       ->key(array('talk_id' => $fields['talk_id']))
@@ -134,14 +145,15 @@ function conference_podcast_feed($episodes) {
           'copyright'     => t('© @year LDS', array('@year' => date('Y', REQUEST_TIME))),
           'description'   => t('General Conference Addresses'),
           //'itunes:category' => 'Religion',
+          'itunes:owner'    => array(
+            'itunes:name'     => 'James Glasgow',
+            'itunes:email'    => 'james@glasgowclan.com',
+          ),
           /*
           'itunes:subtitle' => '',
           'itunes:author'   => '',
           'itunes:summary'  => '',
-          'itunes:owner'    => array(
-            'itunes:name'     => '',
-            'itunes:email'    => '',
-          ),*/
+          */
           'itunes:explicit' => 'no',
           /*0  => array(
             'key'             => 'itunes:image',
@@ -151,6 +163,14 @@ function conference_podcast_feed($episodes) {
           ),*/
         ),
       ),
+    ),
+  );
+  $feed[0]['value']['channel'][] = array(
+    'key'         => 'atom:link',
+    'attributes'  => array(
+      'href'        => url($_GET['q'], array('absolute' => TRUE)),
+      'rel'         => 'self',
+      'type'        => 'application/rss+xml',
     ),
   );
 
@@ -167,7 +187,7 @@ function conference_podcast_feed($episodes) {
 /**
  * when building RSS feeds create the item
  */
-function conference_podcast_feed_item($episode) {dpm($episode, '$episode');
+function conference_podcast_feed_item($episode) {
   $item = array(
     'key'       => 'item',
     'value'     => array(
@@ -195,6 +215,6 @@ function conference_podcast_feed_item($episode) {dpm($episode, '$episode');
       'length'      => $episode->size,
       'type'        => file_get_mimetype($episode->url),
     ),
-  );dpm($item, '$item');
+  );
   return $item;
 }
