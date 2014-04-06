@@ -35,7 +35,6 @@ function conference_podcast_admin() {
  * submit handler
  */
 function conference_podcast_admin_submit($form, &$form_state) {
-  dpm($form_state['values'], 'values');
   if ($form_state['values']['delete']) {
     // truncate the table
     db_truncate('conference_podcast')->execute();
