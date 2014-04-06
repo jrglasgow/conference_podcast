@@ -15,10 +15,13 @@ function conference_podcast_menu() {
   $items['podcast/conference.php'] = array(
     'title'             => 'Conference Podcast',
     'page callback'     => 'conference_podcast_podcast_feed',
-    'access arguments'  => TRUE,
-    'file'              => 'conference_podcast.pages.inc'
+    'access callback'   => TRUE,
+    'file'              => 'conference_podcast.pages.inc',
+    'type'              => MENU_CALLBACK,
   );
   $items['podcasts/conference.php']  = $items['podcast/conference.php'];
+  $items['podcasts/conference.xml']  = $items['podcast/conference.php'];
+  $items['podcasts/conference/rss.xml']  = $items['podcast/conference.php'];
 
   $items['admin/config/media/podcasts'] = array(
     'title'             => 'Podcasts',
